@@ -52,34 +52,35 @@
 s(S) --> statement(S).
 s((S,R)) --> statement(S),s(R).
 
-statement(assignment(A)) --> assignment(A).
-statement(conditional(C)) --> conditional(C).
-statement(loop(L)) --> loop(L).
+statement(A) --> assignment(A).
+statement(C) --> conditional(C).
+statement(L) --> loop(L).
 
 assignment((Id,[=],E)) --> identifier(Id),[=], arithmetic_expression(E),[;].
-conditional(if(IF)) --> if_statement(IF).
-conditional(if_else(C)) --> if_else_statement(C).
-loop(while([while],C,S)) --> [while], condition(C), statement(S).
+conditional(IF) --> if_statement(IF).
+conditional(C) --> if_else_statement(C).
+loop(([while],C,S)) --> [while], condition(C), statement(S).
 
 if_statement((C,S)) --> [if], condition(C), statement(S).
 if_else_statement((IF,[else],S)) --> if_statement(IF), [else],statement(S).
 
-condition(C) --> ['('], relative_expression(C), [')'].
+condition((['('],C,[')'])) --> ['('], relative_expression(C), [')'].
 
-relative_expression(rel(E1,O,E2)) --> arithmetic_expression(E1), rel_operator(O), arithmetic_expression(E2).
+relative_expression((E1,O,E2)) --> arithmetic_expression(E1), rel_operator(O), arithmetic_expression(E2).
 
 
 % arithmetic expression
-arithmetic_expression(arith(T)) --> term(T).
-arithmetic_expression(arith(E)) -->  ['('], arithmetic_expression(E), [')'].
-arithmetic_expression(arith(T,O,E)) --> term(T), arith_operator(O), arithmetic_expression(E).
+arithmetic_expression((T)) --> term(T).
+arithmetic_expression(E) -->  ['('], arithmetic_expression(E), [')'].
+arithmetic_expression((T,O,E)) --> term(T), arith_operator(O), !,arithmetic_expression(E).
+arithmetic_expression((E,O,T)) --> arithmetic_expression(E), !,arith_operator(O), term(T).
 
 % term
-term(term(Id)) --> identifier(Id).
-term(term(N)) --> number(N).
+term(Id) --> identifier(Id).
+term(N) --> number(N).
 
 % lexicon
-identifier(id(FCh,Ch)) --> first_character(FCh), characters(Ch).
+identifier(id([H|T])) --> first_character(H), characters(T).
 
 first_character(L) --> letter(L).
 first_character(Sy) --> symbol(Sy).
@@ -88,7 +89,7 @@ first_character(Sy) --> symbol(Sy).
 % characters((FCh,Ch)) --> character(FCh), characters(Ch).
 
 characters([]) --> [].
-characters([H|T]) --> [H], {atom_length(H,Len),Len<2,char_type(H, alnum); member(H,[$,'_'])}, characters(T).
+characters([H|T]) --> character(H), characters(T).
 
 
 character(C) --> letter(C).
